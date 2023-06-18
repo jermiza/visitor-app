@@ -23,16 +23,19 @@ class VisitorController extends Controller
         $datein_from = $request->query('checkin_from');
         $datein_to = $request->query('checkin_to');
 
-        $visitor_records = Visitor::where('datetime_in', '<=', date('Y-m-d') . ' 23:59:59');
+        $visitor_records = Visitor::where(function ($query) {
+            $query->whereDate('datetime_in', '<=', date('Y-m-d'));
+        });
 
         if (!empty($search_keyword)) {
-            $visitor_records->where('name', 'LIKE', '%' . $search_keyword . '%')
-                ->orWhere('email', 'LIKE', '%' . $search_keyword . '%')
-                ->orWhere('purpose', 'LIKE', '%' . $search_keyword . '%')
-                ->orWhere('contact', 'LIKE', '%' . $search_keyword . '%')
-                ->orWhere('transport', 'LIKE', '%' . $search_keyword . '%');
+            $visitor_records->where(function ($query) use ($search_keyword) {
+                $query->where('name', 'LIKE', '%' . $search_keyword . '%')
+                    ->orWhere('email', 'LIKE', '%' . $search_keyword . '%')
+                    ->orWhere('purpose', 'LIKE', '%' . $search_keyword . '%')
+                    ->orWhere('contact', 'LIKE', '%' . $search_keyword . '%')
+                    ->orWhere('transport', 'LIKE', '%' . $search_keyword . '%');
+            });
         }
-
         if (!empty($datein_from)) {
             $visitor_records->where('datetime_in', '>=', $datein_from . ' 00:00:00');
         }
